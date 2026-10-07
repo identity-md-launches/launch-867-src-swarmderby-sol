@@ -32,6 +32,20 @@ enabled. It spends nothing.
 forge test               # forge-std is vendored in lib/
 ```
 
+The original 53 tests are supplemented by four launch regression tests in
+`test/SwarmDerbyLaunch.t.sol`. Run just those with
+`forge test --match-contract SwarmDerbyLaunchTest`.
+They rehearse zero-ETH CREATE2 deployment with the exact constructor arguments and
+test-only IMD/ArbSys fixtures at their Robinhood addresses; they need no network.
+
+The constructor requires code at the IMD address. Setting only chain id 4663 in an
+empty EVM does not provide that code: deployment reverts with `NotAContract()`.
+The separate protected launch rehearsal must supply the existing dependency state
+using a Robinhood fork or a test-only code fixture before running its deployment
+probe. Our test's fixtures are local to its suite and do not configure that harness.
+Do not remove the guard or add a token to the launch to bypass this requirement.
+See `ADAPTATION.md` for the audit dispositions and validation limits.
+
 ## 2. How it works
 
 **Two leagues.** Each has its own turns, daily pots, slam vault, scoreboard and daily payout.
@@ -69,6 +83,14 @@ buy turns for the player with no wallet popups. Homers, slam payouts, leaderboar
 bought turns all go to the player. Nobody can bind an address without that key's signature,
 the key can leave with `leaveSession()`, and the player can revoke it with
 `setSession(address(0), "")`. The page funds the key with gas sized from live fees.
+
+Use a dedicated throwaway session key. If a funded playing wallet signs a consent
+for another player, that wallet's subsequent purchases are paid from its balance
+but credited to the named player, and its swings use that player's turns and score.
+Its previously owned turns remain recorded but cannot be spent by it until it calls
+`leaveSession()`. Leaving restores access to those turns; it does not undo purchases
+or swings already credited to the other player. Check the typed message's `player`
+and `session` addresses before signing. This existing behavior is unchanged for launch.
 
 **Live scoreboards.** `board(league, day)` holds each UTC day's top 10, so the page shows the
 leaderboards with one call per league and no indexer. The same board pays the day's prizes.
