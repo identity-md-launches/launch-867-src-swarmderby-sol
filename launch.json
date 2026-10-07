@@ -1,0 +1,15 @@
+{
+  "kind": "evm_contracts",
+  "contracts": [
+    {
+      "contract": "SwarmDerby",
+      "constructorArgs": [
+        "$owner",
+        "0x5F7Bb59365ce557C26dbcAa4EE9d39A4b95B7127",
+        "150000000000000000",
+        "500000000000000000"
+      ]
+    }
+  ],
+  "notes": "Deploy only the accepted, unchanged SwarmDerby implementation from src/SwarmDerby.sol on Robinhood Chain. Assign ownership to $owner and use the existing IMD contract at the specified address. Initial prices are 0.15 IMD per turn and 0.5 IMD per five-turn pack. No token, distributor or pool is deployed; no ETH funding or initialization calls are required."
+}
